@@ -49,7 +49,7 @@ def search_for_results(cluster):
                 ]
 
                 for gbs in gbss:
-                    lrs = os.listdir(
+                    if os.path.exists(
                         os.path.join(
                             base_folder,
                             arch_id,
@@ -57,42 +57,51 @@ def search_for_results(cluster):
                             f"gbs_{gbs}",
                             "checkpoints",
                         )
-                    )
-
-                    for lr in lrs:
-                        for fname in os.listdir(
+                    ):
+                        lrs = os.listdir(
                             os.path.join(
                                 base_folder,
                                 arch_id,
                                 "gbs_wise_results",
                                 f"gbs_{gbs}",
                                 "checkpoints",
-                                lr,
                             )
-                        ):
-                            if fname.startswith("metrics_decayed_to_"):
-                                qpath = os.path.join(
+                        )
+
+                        for lr in lrs:
+                            for fname in os.listdir(
+                                os.path.join(
                                     base_folder,
                                     arch_id,
-                                    n,
                                     "gbs_wise_results",
                                     f"gbs_{gbs}",
                                     "checkpoints",
                                     lr,
-                                    fname,
                                 )
-                                d = fname.split("_")[-1][:-3].replace("p", ".")
-                                outputs.append(
-                                    (
-                                        qpath,
-                                        cluster,
+                            ):
+                                if fname.startswith("metrics_decayed_to_"):
+                                    qpath = os.path.join(
+                                        base_folder,
                                         arch_id,
                                         n,
-                                        d,
-                                        gbs,
-                                        float(lr.replace("p", ".")),
+                                        "gbs_wise_results",
+                                        f"gbs_{gbs}",
+                                        "checkpoints",
+                                        lr,
+                                        fname,
                                     )
-                                )
+                                    d = fname.split("_")[-1][:-3].replace("p", ".")
+                                    outputs.append(
+                                        (
+                                            qpath,
+                                            cluster,
+                                            arch_id,
+                                            n,
+                                            d,
+                                            gbs,
+                                            float(lr.replace("p", ".")),
+                                        )
+                                    )
 
     return outputs
 
