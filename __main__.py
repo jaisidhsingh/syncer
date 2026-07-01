@@ -124,29 +124,20 @@ def main(argv):
     results = search_for_results(cluster)
     dump = prepare_dump(results)
 
-    if os.path.getsize("./store/raw.csv") == 0:
-        raise Exception("raw.csv is empty. cannot proceed with df.")
+    locs = ["raw", "filtered", "cluster"]
+    loc_paths = [f"./store/{loc}.csv" for loc in locs]
 
-    raw_df = pd.read_csv("./store/raw.csv")
-    raw_df = pd.concat([raw_df, pd.DataFrame(dump)], ignore_index=True)
-    raw_df.to_csv("./store/raw.csv")
+    for lp in loc_paths:
+        if os.path.getsize(lp) == 0:
+            with open(lp) as f:
+                f.writelines(",".join(DB_COLS))
 
-    if os.path.getsize("./store/filtered.csv") == 0:
-        raise Exception("filtered.csv is empty. cannot proceed with df.")
+        df = pd.read_csv(lp)
+        df = pd.concat([df, pd.DataFrame(dump)], ignore_index=True)
+        if "filtered" in lp:
+            df = df.drop_duplicates(subset="time_last_mod", keep="first")
 
-    filtered_df = pd.read_csv("./store/filtered.csv")
-    filtered_df = pd.concat(
-        [filtered_df, pd.DataFrame(dump)], ignore_index=True
-    ).drop_duplicates(subset="time_created", keep="first")
-    filtered_df.to_csv("./store/filtered.csv")
-
-    if os.path.getsize("./store/cluster.csv") == 0:
-        raise Exception("cluster.csv is empty. cannot proceed with df.")
-
-    cluster_df = pd.read_csv(f"./store/{cluster}.csv")
-    cluster_df = pd.concat([cluster_df, pd.DataFrame(dump)], ignore_index=True)
-    cluster_df.to_csv(f"./store/{cluster}.csv")
-    print("All done!")
+        df.to_csv(lp)
 
 
 if __name__ == "__main__":
