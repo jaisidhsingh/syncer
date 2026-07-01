@@ -124,7 +124,7 @@ def main(argv):
     results = search_for_results(cluster)
     dump = prepare_dump(results)
 
-    locs = ["raw", "filtered", "cluster"]
+    locs = ["raw", "filtered", cluster]
     loc_paths = [f"./store/{loc}.csv" for loc in locs]
 
     for lp in loc_paths:
