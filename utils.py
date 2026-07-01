@@ -1,5 +1,5 @@
 import math
-
+from copy import deepcopy
 import numpy as np
 import pandas as pd
 
@@ -18,6 +18,18 @@ class Collector:
         if limits is not None:
             for col, (lo, hi) in limits.items():
                 self.df = self.df[(self.df[col] >= lo) & (self.df[col] <= hi)]
+    
+    def index(self, n=None, d=None, gbs=None, lr=None):
+        df = deepcopy(self.df)
+        if n is not None:
+            df = df[df["n"] == n]
+        if d is not None:
+            df = df[df["d"] == d]
+        if gbs is not None:
+            df = df[df["gbs"] == gbs]
+        if lr is not None:
+            df = df[df["lr"] == lr]
+        return df
 
     def _best(self, filters, group_cols, loss_type):
         assert loss_type in ("train", "val")
@@ -147,3 +159,28 @@ class Collector:
         gbs_star = float(2**x_star) if x_star is not None else None
 
         return gbs_star, y_star
+
+
+def quad_log2_fit(x, y):
+    x = np.asarray(x)
+    y = np.asarray(y)
+
+    mask = np.isfinite(x) & np.isfinite(y)
+    x = x[mask]
+    y = y[mask]
+
+    if len(x) < 3:
+        raise ValueError("Need at least 3 points for quadratic fit")
+
+    # transform to log2 space
+    x_log = np.log2(x)
+
+    # quadratic fit
+    coeffs = np.polyfit(x_log, y, 2)
+    a, b, c = coeffs
+
+    # smooth curve
+    x_fit_log = np.linspace(x_log.min(), x_log.max(), 200)
+    y_fit = a * x_fit_log**2 + b * x_fit_log + c
+    x_fit = 2 ** x_fit_log
+    return x_fit, y_fit
