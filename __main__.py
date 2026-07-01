@@ -8,7 +8,7 @@ from absl import app
 PREFIXES = {
     "tud": "/data/horse/ws/jasi149i-fastlm/results",
     "alpha": "/data/horse/ws/jasi149i-fastlm/results",
-    "mpi": "/data/horse/ws/jasi149i-fastlm/results",
+    "mpi": "/fast/jsingh/projects/fastlm/june/results",
 }
 DB_COLS = [
     "arch_id",
