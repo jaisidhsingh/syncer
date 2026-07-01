@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 from datetime import datetime
@@ -130,7 +131,8 @@ def main(argv):
     for lp in loc_paths:
         if os.path.getsize(lp) == 0:
             with open(lp, "w") as f:
-                f.writelines(",".join(DB_COLS))
+                writer = csv.write(f)
+                writer.writerow(DB_COLS)
 
         df = pd.read_csv(lp)
         df = pd.concat([df, pd.DataFrame(dump)], ignore_index=True)
