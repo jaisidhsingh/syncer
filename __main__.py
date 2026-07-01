@@ -131,7 +131,7 @@ def main(argv):
     for lp in loc_paths:
         if os.path.getsize(lp) == 0:
             with open(lp, "w") as f:
-                writer = csv.write(f)
+                writer = csv.writer(f)
                 writer.writerow(DB_COLS)
 
         df = pd.read_csv(lp)
