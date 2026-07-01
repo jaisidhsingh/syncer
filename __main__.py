@@ -53,7 +53,7 @@ def search_for_results(cluster):
                     if os.path.exists(
                         os.path.join(
                             base_folder,
-                            arch_id,
+                            arch_id, n,
                             "gbs_wise_results",
                             f"gbs_{gbs}",
                             "checkpoints",
@@ -62,7 +62,7 @@ def search_for_results(cluster):
                         lrs = os.listdir(
                             os.path.join(
                                 base_folder,
-                                arch_id,
+                                arch_id, n,
                                 "gbs_wise_results",
                                 f"gbs_{gbs}",
                                 "checkpoints",
@@ -73,7 +73,7 @@ def search_for_results(cluster):
                             for fname in os.listdir(
                                 os.path.join(
                                     base_folder,
-                                    arch_id,
+                                    arch_id, n,
                                     "gbs_wise_results",
                                     f"gbs_{gbs}",
                                     "checkpoints",
@@ -91,17 +91,17 @@ def search_for_results(cluster):
                                         lr,
                                         fname,
                                     )
-                                    d = fname.split("_")[-1][:-3].replace("p", ".")
+                                    d = fname.split("_")[-1][:-5].replace("p", ".")
                                     outputs.append(
-                                        (
+                                        [
                                             qpath,
                                             cluster,
                                             arch_id,
                                             n,
                                             d,
                                             gbs,
-                                            float(lr.replace("p", ".")),
-                                        )
+                                            float(lr.split("_")[-1].replace("p", ".")),
+                                        ]
                                     )
 
     return outputs
@@ -135,9 +135,12 @@ def main(argv):
                 writer.writerow(DB_COLS)
 
         df = pd.read_csv(lp)
-        df = pd.concat([df, pd.DataFrame(dump)], ignore_index=True)
+        if "raw" in lp or "filtered" in lp:
+            df = pd.concat([df, pd.DataFrame(dump)], ignore_index=True)
         if "filtered" in lp:
             df = df.drop_duplicates(subset="time_last_mod", keep="first")
+        if cluster in lp:
+            df = pd.DataFrame(df)
 
         df.to_csv(lp)
 
