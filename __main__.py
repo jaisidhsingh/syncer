@@ -26,7 +26,7 @@ DB_COLS = [
 def load_train_val_losses(path):
     with open(path) as f:
         da = json.load(f)
-    losses = [float(da["train/loss"]), float(da["valid/loss"])]
+    losses = [float(da["train/loss"][-1]), float(da["valid/loss"][-1])]
     info = os.stat(path)
     timelastmod = datetime.fromtimestamp(info.st_ctime).strftime("%Y-%m-%d %H:%M:%S")
     return losses, timelastmod
@@ -124,15 +124,24 @@ def main(argv):
     results = search_for_results(cluster)
     dump = prepare_dump(results)
 
+    if os.path.getsize("./store/raw.csv") == 0:
+        raise Exception("raw.csv is empty. cannot proceed with df.")
+
     raw_df = pd.read_csv("./store/raw.csv")
     raw_df = pd.concat([raw_df, pd.DataFrame(dump)], ignore_index=True)
     raw_df.to_csv("./store/raw.csv")
+
+    if os.path.getsize("./store/filtered.csv") == 0:
+        raise Exception("filtered.csv is empty. cannot proceed with df.")
 
     filtered_df = pd.read_csv("./store/filtered.csv")
     filtered_df = pd.concat(
         [filtered_df, pd.DataFrame(dump)], ignore_index=True
     ).drop_duplicates(subset="time_created", keep="first")
     filtered_df.to_csv("./store/filtered.csv")
+
+    if os.path.getsize("./store/cluster.csv") == 0:
+        raise Exception("cluster.csv is empty. cannot proceed with df.")
 
     cluster_df = pd.read_csv(f"./store/{cluster}.csv")
     cluster_df = pd.concat([cluster_df, pd.DataFrame(dump)], ignore_index=True)
